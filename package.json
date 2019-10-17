@@ -1,0 +1,17 @@
+{
+  "name": "serialkiller",
+  "version": "0.0.1",
+  "description": "Serialize everything",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "coditva",
+  "license": "ISC",
+  "dependencies": {
+    "flatted": "^2.0.1"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.15"
+  }
+}
