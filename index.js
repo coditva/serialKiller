@@ -13,6 +13,9 @@ const flatted = require('flatted'),
  * Returns the string value for the Symbol.
  * e.g. If there's a Symbol defined as Symbol('id'), this function returns 'id'.
  *
+ * @note we're not using `Symbol.description` because it's support in NodeJS is
+ * not documented.
+ *
  * @param {Symbol} value - Symbol to be processed
  * @returns {String} - The primitive of the Symbol
  */
@@ -37,6 +40,7 @@ function getRegexFromString (str) {
 
     return new RegExp(str.substring(start, end), str.substring(end + 1));
 }
+
 
 let replacer = function (_key, value) {
     if (value === undefined) {
@@ -77,6 +81,31 @@ let reviver = function (_key, value) {
     return value;
 };
 
+let stringReviver = function (_key, value) {
+    if (typeof value === 'string' && value.startsWith(MODIFIER)) {
+        let type = value.substring(modifierLength + 1, modifierLength + 2),
+            data = value.substring(modifierLength + 3);
+
+        switch (type) {
+            case 'u':
+                return 'undefined';
+
+            case 'b':
+                return data + 'n';
+
+            case 'r':
+            case 's':
+                return data;
+        }
+    }
+
+    if (value && typeof value === 'object') {
+        return value;
+    }
+
+    return String(value);
+}
+
 module.exports = {
     stringify: function (data, options) {
         return flatted.stringify(data, replacer, options);
@@ -84,5 +113,9 @@ module.exports = {
 
     parse: function (data, options) {
         return flatted.parse(data, reviver, options);
+    },
+
+    toString: function (data, options) {
+        return flatted.parse(data, stringReviver, options);
     }
 };

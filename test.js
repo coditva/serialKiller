@@ -11,8 +11,8 @@ function runTest (testName, data) {
         console.info('pass');
     } else {
         console.error('fail');
-        console.log('\tdata   :', data);
-        console.log('\tparsed :', parsed);
+        console.log('data   :\n', data);
+        console.log('parsed :\n', parsed);
     }
 }
 
@@ -33,7 +33,8 @@ runTest('array', [null, undefined, [ null, { a: undefined }]]);
 runTest('circular', circularObj);
 runTest('symbol', {
     sym: Symbol.for('sym'),
-    num: Symbol.for(100)
+    num: Symbol.for(100),
+    iter: Symbol.iterator
 });
 
 
