@@ -31,7 +31,10 @@ runTest('null', null);
 runTest('object', { a: /a-z/ });
 runTest('array', [null, undefined, [ null, { a: undefined }]]);
 runTest('circular', circularObj);
-runTest('symbol', Symbol.for('sym'));
+runTest('symbol', {
+    sym: Symbol.for('sym'),
+    num: Symbol.for(100)
+});
 
 
 

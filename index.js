@@ -9,13 +9,28 @@ const flatted = require('flatted'),
 
     modifierLength = MODIFIER.length;
 
+/**
+ * Returns the string value for the Symbol.
+ * e.g. If there's a Symbol defined as Symbol('id'), this function returns 'id'.
+ *
+ * @param {Symbol} value - Symbol to be processed
+ * @returns {String} - The primitive of the Symbol
+ */
 function encodeSymbolToString (value) {
-    let result;
+    let result = value.toString();
 
-    result = value.toString();
-    return result.substring(result.indexOf('(') + 1, result.lastIndexOf(')'));
+    return result.substring(7, result.length - 1);
 }
 
+/**
+ * Converts a regex in string to the actual regex.
+ *
+ * e.g. If passed a string with value `/a-z/gm`, it converts it to the regexp
+ * instance for this value.
+ *
+ * @param {String} str - The regex as a string
+ * @returns {RegExp} - RegExp instance for the string
+ */
 function getRegexFromString (str) {
     let start = 1,
         end = str.lastIndexOf('/');
