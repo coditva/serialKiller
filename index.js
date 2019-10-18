@@ -2,10 +2,14 @@ const flatted = require('flatted'),
 
     MODIFIER = '__modifier',
     SEPARATOR = ';',
+    FUNCTION_SEPARATOR = ':',
+
     UNDEFINED_IDENTIFIER = 'u',
     SYMBOL_IDENTIFIER = 's',
     BIGINT_IDENTIFIER = 'b',
     REGEXP_IDENTIFIER = 'r',
+    FUNCTION_IDENTIFIER = 'f',
+    CONFLICT_IDENTIFIER = 'c',
 
     modifierLength = MODIFIER.length;
 
@@ -23,6 +27,24 @@ function encodeSymbolToString (value) {
     let result = value.toString();
 
     return result.substring(7, result.length - 1);
+}
+
+function encodeFunctionToString (value) {
+    let args,
+        functionString = value.toString();
+
+    args = functionString.substring(functionString.indexOf('(') + 1, functionString.indexOf(')'));
+    args = args.split(',');
+
+    return value.name + FUNCTION_SEPARATOR + args.map((v) => {
+        return v.trim();
+    }).join(FUNCTION_SEPARATOR);
+}
+
+function decodeFunctionFromString (value) {
+    let f = value.split(FUNCTION_SEPARATOR);
+
+    return 'Function ' + f[0] + ' (' + f.slice(1).join(', ') + ')';
 }
 
 /**
@@ -43,6 +65,10 @@ function getRegexFromString (str) {
 
 
 let replacer = function (_key, value) {
+    if (typeof value === 'string' && value.startsWith(MODIFIER)) {
+        return MODIFIER + SEPARATOR + CONFLICT_IDENTIFIER + SEPARATOR + value;
+    }
+
     if (value === undefined) {
         return MODIFIER + SEPARATOR + UNDEFINED_IDENTIFIER;
     }
@@ -59,28 +85,39 @@ let replacer = function (_key, value) {
         return MODIFIER + SEPARATOR + REGEXP_IDENTIFIER + SEPARATOR + value.toString();
     }
 
+    if (typeof value === 'function') {
+        return MODIFIER + SEPARATOR + FUNCTION_IDENTIFIER + SEPARATOR + encodeFunctionToString(value);
+    }
+
     return value;
 };
 
 let reviver = function (_key, value) {
     if (typeof value === 'string' && value.startsWith(MODIFIER)) {
-        let type = value.substring(modifierLength + 1, modifierLength + 2);
+        let type = value.substring(modifierLength + 1, modifierLength + 2),
+            data = value.substring(modifierLength + 3);
 
         switch (type) {
-            case 'u':
+            case UNDEFINED_IDENTIFIER:
                 return undefined;
 
-            case 'r':
-                return getRegexFromString(value.substring(modifierLength + 3));
+            case REGEXP_IDENTIFIER:
+                return getRegexFromString(data);
 
-            case 'b':
-                return BigInt(value.substring(modifierLength + 3));
+            case BIGINT_IDENTIFIER:
+                return BigInt(data);
 
-            case 's':
+            case SYMBOL_IDENTIFIER:
                 // We might want to remove `Symbol.for` for performance if we're
                 // sure we don't need to get the reference to the original
                 // symbol.
-                return Symbol.for(value.substring(modifierLength + 3));
+                return Symbol.for(data);
+
+            case FUNCTION_IDENTIFIER:
+                return decodeFunctionFromString(data);
+
+            case CONFLICT_IDENTIFIER:
+                return data;
         }
     }
 
@@ -93,14 +130,17 @@ let stringReviver = function (_key, value) {
             data = value.substring(modifierLength + 3);
 
         switch (type) {
-            case 'u':
+            case UNDEFINED_IDENTIFIER:
                 return 'undefined';
 
-            case 'b':
+            case BIGINT_IDENTIFIER:
                 return data + 'n';
 
-            case 'r':
-            case 's':
+            case FUNCTION_IDENTIFIER:
+                return decodeFunctionFromString(data);
+
+            case REGEXP_IDENTIFIER:
+            case SYMBOL_IDENTIFIER:
                 return data;
         }
     }
