@@ -69,11 +69,17 @@ let reviver = function (_key, value) {
         switch (type) {
             case 'u':
                 return undefined;
+
             case 'r':
                 return getRegexFromString(value.substring(modifierLength + 3));
+
             case 'b':
                 return BigInt(value.substring(modifierLength + 3));
+
             case 's':
+                // We might want to remove `Symbol.for` for performance if we're
+                // sure we don't need to get the reference to the original
+                // symbol.
                 return Symbol.for(value.substring(modifierLength + 3));
         }
     }
