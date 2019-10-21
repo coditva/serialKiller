@@ -44,7 +44,7 @@ function encodeFunctionToString (value) {
 function decodeFunctionFromString (value) {
     let f = value.split(FUNCTION_SEPARATOR);
 
-    return 'Function ' + f[0] + ' (' + f.slice(1).join(', ') + ')';
+    return 'Function ' + (f[0] && (f[0] + ' ')) + '(' + f.slice(1).join(', ') + ')';
 }
 
 /**
