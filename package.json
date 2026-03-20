@@ -9,7 +9,7 @@
   "author": "coditva",
   "license": "ISC",
   "dependencies": {
-    "flatted": "^2.0.1"
+    "flatted": "^3.4.2"
   },
   "devDependencies": {
     "lodash": "^4.17.21"
